@@ -5,4 +5,4 @@
 </p>
 
 > [!WIP]
-__Work in Progress__ The paper is still under review, and the repository is still work in progress. We are targeting to finalize SemCoder by the end of September. Stay Tuned!
+> __Work in Progress__ The paper is still under review, and the repository is still work in progress. We are targeting to finalize SemCoder by the end of September. Stay Tuned!
