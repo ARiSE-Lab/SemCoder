@@ -63,7 +63,7 @@ python experiments/run_cruxeval.py \
     --start 0 \
     --end 800 \
     --shuffle \
-    --exec_deduction \
+    --backward_monologue \
     --prompt_prefix \
     --tensor_parallel_size 1
 
@@ -100,6 +100,7 @@ python evaluate_generations.py \
 # CRUXEval-O: run inference
 ###########################
 
+cd $SEMCODER_HOME;
 OPT_BASE="${SEMCODER_HOME}/output_dir/eval/cruxeval/cruxeval_output"
 
 echo "Evaluating model: ${MODEL} on CRUXEval-O (direct prediction)..."
@@ -157,8 +158,7 @@ python experiments/run_cruxeval.py \
 ########################## 
 # CRUXEval-O: Report score
 ##########################
-
-echo "Reporting score for model: ${model_name}..."
+echo "Reporting score for model: ${model_name}...";
 
 python experiments/cruxeval_combine_generations.py --gen_dir ${direct_pred_dir}
 python experiments/process_cruxeval.py --task o --gen_dir ${direct_pred_dir}
