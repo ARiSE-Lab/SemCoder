@@ -46,7 +46,7 @@ def train():
     )
     
     # batch processing the raw examples into a format that the model can process, and save the processed examples into a Dataset instance
-    if args.task == "semcoder": # or args.task == "semcoder_refine":
+    if args.task == "semcoder" or args.task == "finetune_refine":
         train_dataset = dataset.map(
             function=map_dataset_multitask,
             fn_kwargs=dict(args=args, context=tokenization_context),

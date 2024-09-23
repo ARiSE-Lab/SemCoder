@@ -84,58 +84,61 @@ def map_dataset_multitask(
     exec_deduc = examples["exec_deduc"]
     responses = examples["response"]
 
-    # if args.task == "nl2code_exec":
-    prompts = []
-    completions = []
-    for nl_i, exec_simu_i, exec_deduc_i, response_i in zip(
-        nl, exec_simu, exec_deduc, responses
-    ):
-        # Not allow all empty samples
-        assert not (nl_i == "" and exec_simu_i == "" and exec_deduc_i == "")
-        # Only one of the three has content
-        assert sum([nl_i != "", exec_simu_i != "", exec_deduc_i != ""]) == 1
-        if nl_i != "":
-            prompt = NL2CODE_PROMPT.format(instruction=nl_i, response="")
+    if args.task == "semcoder":
+        prompts = []
+        completions = []
+        for nl_i, exec_simu_i, exec_deduc_i, response_i in zip(
+            nl, exec_simu, exec_deduc, responses
+        ):
+            # Not allow all empty samples
+            assert not (nl_i == "" and exec_simu_i == "" and exec_deduc_i == "")
+            # Only one of the three has content
+            assert sum([nl_i != "", exec_simu_i != "", exec_deduc_i != ""]) == 1
+            if nl_i != "":
+                prompt = NL2CODE_PROMPT.format(instruction=nl_i, response="")
+                completion = response_i
+            elif exec_deduc_i != "":
+                prompt = EXEC_I_PROMPT.format(instruction=exec_deduc_i, response="")
+                completion = response_i
+            else:
+                prompt = EXEC_O_PROMPT.format(instruction=exec_simu_i, response="")
+                completion = response_i
+            prompts.append(prompt)
+            completions.append(completion)
+    elif args.task == "finetune_refine":
+        faults = examples["fault"]
+        prompts = []
+        completions = []
+        # for nl_i, exec_simu_i, exec_deduc_i, fault_i, response_i in zip(
+        #     nl, exec_simu, exec_deduc, faults, responses
+        # ):
+        for fault_i, response_i in zip(faults, responses):
+            # Not allow all empty samples
+            # assert not (
+            #     nl_i == "" and exec_simu_i == "" and exec_deduc_i == "" and fault_i == ""
+            # )
+            # # Only one of the four has content
+            # assert sum(
+            #     [nl_i != "", exec_simu_i != "", exec_deduc_i != "", fault_i != ""]
+            # ) == 1
+            # if nl_i != "":
+            #     prompt = NL2CODE_PROMPT.format(instruction=nl_i, response="")
+            #     completion = response_i
+            # elif exec_deduc_i != "":
+            #     prompt = EXEC_I_PROMPT.format(instruction=exec_deduc_i, response="")
+            #     completion = response_i
+            # elif fault_i != "":
+            #     prompt = REFINE_PROMPT.format(instruction=fault_i, response="")
+            #     completion = response_i
+            # else:
+            #     prompt = EXEC_O_PROMPT.format(instruction=exec_simu_i, response="")
+            #     completion = response_i
+            prompt = REFINE_PROMPT.format(instruction=fault_i, response="")
             completion = response_i
-        elif exec_deduc_i != "":
-            prompt = EXEC_I_PROMPT.format(instruction=exec_deduc_i, response="")
-            completion = response_i
-        else:
-            prompt = EXEC_O_PROMPT.format(instruction=exec_simu_i, response="")
-            completion = response_i
-        prompts.append(prompt)
-        completions.append(completion)
-    # elif args.task == "nl2code_exec_refine":
-    #     faults = examples["fault"]
-    #     prompts = []
-    #     completions = []
-    #     for nl_i, exec_simu_i, exec_deduc_i, fault_i, response_i in zip(
-    #         nl, exec_simu, exec_deduc, faults, responses
-    #     ):
-    #         # Not allow all empty samples
-    #         assert not (
-    #             nl_i == "" and exec_simu_i == "" and exec_deduc_i == "" and fault_i == ""
-    #         )
-    #         # Only one of the four has content
-    #         assert sum(
-    #             [nl_i != "", exec_simu_i != "", exec_deduc_i != "", fault_i != ""]
-    #         ) == 1
-    #         if nl_i != "":
-    #             prompt = NL2CODE_PROMPT.format(instruction=nl_i, response="")
-    #             completion = response_i
-    #         elif exec_deduc_i != "":
-    #             prompt = EXEC_I_PROMPT.format(instruction=exec_deduc_i, response="")
-    #             completion = response_i
-    #         elif fault_i != "":
-    #             prompt = REFINE_PROMPT.format(instruction=fault_i, response="")
-    #             completion = response_i
-    #         else:
-    #             prompt = EXEC_O_PROMPT.format(instruction=exec_simu_i, response="")
-    #             completion = response_i
-    #         prompts.append(prompt)
-    #         completions.append(completion)
-    # else:
-    #     raise ValueError(f"Invalid task: {args.task}")
+            prompts.append(prompt)
+            completions.append(completion)
+    else:
+        raise ValueError(f"Invalid task: {args.task}")
 
     assert len(prompts) == len(completions)
     prompt_config = EncodingConfig(add_bos=True, add_eos=False)
