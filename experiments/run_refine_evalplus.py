@@ -12,16 +12,39 @@ from src.prompts import REFINE_PROMPT, REFINE_PROMPT_ONE_SHOT
 from src.utils import chunked
 import json
 
-PROMPT_TEMPLATE = """<Prompt>
-{prompt}
-<Faulty Trace>
+PROMPT_TEMPLATE_BASELINE = """### Problem
+{problem}
+
+### Buggy Solution
+```python
+{code}
+```
+
+### Failed Test
+```python
+{error}
+
+[MONOLOGUE]
+### Execution Simulation
 ```python
 {trace}
 ```
-<Failed Test>
+### Root Cause Analysis
+"""
+
+PROMPT_TEMPLATE = """### Problem
+{problem}
+
+### Buggy Solution
 ```python
-{failed_test}
-```"""
+{code}
+```
+
+### Failed Test
+```python
+{error}
+```
+"""
 
 class NL2CodeProblem(TypedDict):
     id: str
@@ -39,19 +62,14 @@ def get_humaneval_raw_problems() -> list[dict]:
     return list(problems.values())
 
 
-def map_problem(p: dict) -> NL2CodeProblem:
+def map_problem(p: dict, baseline: bool) -> NL2CodeProblem:
     id = p["raw_index"]
-    instruction = PROMPT_TEMPLATE.format(prompt=p["nl"], trace=p["buggy_trace"], failed_test=p["failed_test"])
-    response_prefix = f"""The root cause of the failure"""
-    
-    return NL2CodeProblem(
-        id=id, instruction=instruction, response_prefix=response_prefix
-    )
-
-def map_problem_one_shot(p: dict) -> NL2CodeProblem:
-    id = p["raw_index"]
-    instruction = PROMPT_TEMPLATE.format(prompt=p["nl"], trace=p["buggy_trace"], failed_test=p["failed_test"])
-    response_prefix = f"""The root cause of the failure is that """
+    if baseline:
+        instruction = PROMPT_TEMPLATE_BASELINE.format(problem=p["nl"], code=p["solution"], error=p["failed_test"], trace=p["buggy_trace"])
+    else:
+        instruction = PROMPT_TEMPLATE.format(problem=p["nl"], code=p["solution"], error=p["failed_test"])
+    # response_prefix = f"""The root cause of the failure"""
+    response_prefix = ""
     
     return NL2CodeProblem(
         id=id, instruction=instruction, response_prefix=response_prefix
@@ -68,6 +86,7 @@ class Args:
     n_problems_per_batch: int
     n_samples_per_problem: int
     one_shot: bool
+    baseline: bool
 
     model_name_or_path: str | None = None
 
@@ -78,18 +97,11 @@ def main():
         tuple[Args, GenerationConfig],
         parser.parse_args_into_dataclasses(),
     )
-    if args.one_shot:
-        raw_problem_fn, map_problem_fn = (
-            (get_humaneval_raw_problems, map_problem_one_shot)
-            if args.dataset == "humaneval"
-            else (get_mbpp_raw_problems, map_problem_one_shot)
-        )
-    else:
-        raw_problem_fn, map_problem_fn = (
-            (get_humaneval_raw_problems, map_problem)
-            if args.dataset == "humaneval"
-            else (get_mbpp_raw_problems, map_problem)
-        )
+    raw_problem_fn, map_problem_fn = (
+        (get_humaneval_raw_problems, map_problem)
+        if args.dataset == "humaneval"
+        else (get_mbpp_raw_problems, map_problem)
+    )
     raw_problems = raw_problem_fn()
     # map the raw problems to a dict {"<task_id>": <prompt>}"
     raw_problems_dict = {p["task_id"]: p["prompt"] for p in raw_problems}
@@ -99,7 +111,7 @@ def main():
 
     fault_history = [json.loads(fault) for fault in fault_history]
 
-    problems = list(map(map_problem_fn, fault_history))
+    problems = list(map(map_problem_fn, fault_history, itertools.cycle([args.baseline])))
 
     state = get_model_context(args.model_key, args.model_name_or_path)
 

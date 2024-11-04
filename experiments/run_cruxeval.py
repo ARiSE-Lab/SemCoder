@@ -206,6 +206,7 @@ def main():
         trust_remote_code=args.trust_remote_code, 
         gpu_memory_utilization=0.98,
         tensor_parallel_size=args.tensor_parallel_size,
+        max_model_len=4096,
     )
 
     tokenizer = AutoTokenizer.from_pretrained(

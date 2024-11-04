@@ -1,29 +1,37 @@
-# 🗣️ SemCoder: Training Code Language Models with Comprehensive Semantics
+# 🤔 SemCoder: Training Code Language Models with Comprehensive Semantics
 
 <p align="center">
     <a href="https://arxiv.org/abs/2406.01006"><img src="https://img.shields.io/badge/arXiv-2406.01006-b31b1b.svg?style=for-the-badge">
 </p>
 
 <p align="center">
-    🤖&nbsp;<a href="#-models">Models</a>
+    🤔&nbsp;<a href="#-overview">Overview</a>
+    | 🤖&nbsp;<a href="#-models">Models</a>
+    | 📚&nbsp;<a href="#-dataset">Dataset</a>
     | 🛠️&nbsp;<a href="#-get-started">Get Started</a>
     | 🕹️&nbsp;<a href="#-demo">Demo</a>
     | 📝&nbsp;<a href="#-citation">Citation</a>
     | 🙏&nbsp;<a href="#-acknowledgements">Acknowledgements</a>
 </p>
 
-> [!NOTE]
-> 
-> __Work in Progress__: The repository is still work in progress. We are targeting to finalize the release by the end of October, 2024. Stay Tuned!
+## 📰 News
 
+- []
+
+## 🤔 Overview
 
 ## 🤖 Models
 
-| Model      | Checkpoint                                               | Size | License                                                                           |
-|------------|----------------------------------------------------------|------|-----------------------------------------------------------------------------------|
-| SemCoder   | 🤗 [HF Link](https://huggingface.co/semcoder/semcoder)   | 6.7B | [DeepSeek](https://github.com/deepseek-ai/DeepSeek-Coder/blob/main/LICENSE-MODEL) |
-| SemCoder-S | 🤗 [HF Link](https://huggingface.co/semcoder/semcoder_s) | 6.7B | [DeepSeek](https://github.com/deepseek-ai/DeepSeek-Coder/blob/main/LICENSE-MODEL) |
+| Model      | Checkpoint                                               | Size | HEval (+)   | MBPP (+)    | CRUXEval-I  | CRUXEval-O  |License                                                                           |
+|------------|----------------------------------------------------------|------|-------------|-------------|-------------|-------------|-----------------------------------------------------------------------------------|
+| SemCoder   | 🤗 [HF Link](https://huggingface.co/semcoder/semcoder)   | 6.7B | --.- (--.-) | --.- (--.-) | --.- (--.-) | --.- (--.-) | [DeepSeek](https://github.com/deepseek-ai/DeepSeek-Coder/blob/main/LICENSE-MODEL) |
+| SemCoder-S | 🤗 [HF Link](https://huggingface.co/semcoder/semcoder_s) | 6.7B | --.- (--.-) | --.- (--.-) | --.- (--.-) | --.- (--.-) | [DeepSeek](https://github.com/deepseek-ai/DeepSeek-Coder/blob/main/LICENSE-MODEL) |
 
+## 📚 Dataset
+
+* [PyX](?): ???
+* [PyX-Monologue](?): ???.
+* [PyX-R](?): ???.
 
 ## 🛠️ Get Started
 
@@ -74,6 +82,40 @@ bash scripts/eval/eval_cruxeval.sh
 
 ```sh
 bash scripts/eval/eval_finetune_refine.sh
+```
+
+- ✨ __[New]__ ✨ To evaluate SemCoder on [LiveCodeBench](https://livecodebench.github.io/) for code generation, please follow these steps:
+
+```sh
+# Clone our adapted LiveCodeBench
+git clone https://github.com/Robin-Y-Ding/LiveCodeBench.git;
+
+# Set up environment
+cd LiveCodeBench;
+conda create -n livecodebench Python=3.10;
+conda activate livecodebench;
+pip install poetry;
+poetry install --with with-gpu;
+
+# Run evaluation
+export CUDA_VISIBLE_DEVICES=0;
+python -m lcb_runner.runner.main \
+  --model semcoder/semcoder_s \
+  --scenario codegeneration \
+  --evaluate
+
+```
+- ✨ __[New]__ ✨ To evaluate SemCoder on [LiveCodeBench](https://livecodebench.github.io/) for code execution, you can run:
+
+```sh
+export CUDA_VISIBLE_DEVICES=0;
+cd LiveCodeBench;
+python -m lcb_runner.runner.main \
+    --model semcoder/semcoder_s \
+    --scenario codeexecution \
+    --cot_code_execution \
+    --n 1 \
+    --evaluate
 ```
 
 ## 📝 Citation

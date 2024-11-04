@@ -9,7 +9,7 @@ from src.wrapper import (
     get_model_context,
 )
 from src.utils import Args, N_CORES
-from src.dataset import get_data_collator, map_dataset_chat, map_dataset_multitask
+from src.dataset import get_data_collator, map_dataset_chat, map_dataset_multitask, map_dataset_multitask_v1p5
 
 @dataclass(frozen=True)
 class ModelArguments:
@@ -49,6 +49,16 @@ def train():
     if args.task == "semcoder" or args.task == "finetune_refine":
         train_dataset = dataset.map(
             function=map_dataset_multitask,
+            fn_kwargs=dict(args=args, context=tokenization_context),
+            batched=True,
+            num_proc=N_CORES,
+            remove_columns=dataset.column_names,
+            load_from_cache_file= not args.overwrite_cache,
+            desc="Running tokenizer on train dataset",
+        )
+    elif args.task == "semcoder-v1.5": # v1.5 in progress
+        train_dataset = dataset.map(
+            function=map_dataset_multitask_v1p5,
             fn_kwargs=dict(args=args, context=tokenization_context),
             batched=True,
             num_proc=N_CORES,

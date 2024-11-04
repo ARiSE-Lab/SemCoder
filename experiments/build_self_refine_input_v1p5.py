@@ -1,7 +1,7 @@
 import argparse
 import json
-from experiments.construct_trace import attach_trace_to_code
 import re
+from experiments.construct_trace import attach_trace_to_code
 
 def extract_failed_test(traced_program, funcname):
     """
@@ -58,6 +58,8 @@ def extract_trace(trace, inference=False):
     trace = '\n'.join([l.lstrip() for l in trace_lines[start:end + 1]])
     return trace
 
+
+
 def attach_execution_exception(traced_program, trace):
     """
     attach the exception happening during the execution (i.e., not the test-case assertion error) to the traced program
@@ -98,74 +100,65 @@ def prepare_data():
     """
     total_samples = 0
     no_failed_test = 0
-    no_func_trace = 0
-    dense_samples = 0
-    sample_per_example = {}
     with open(args.output_file, 'w') as f_out:
         with open(args.bug_report_file, 'r') as f:
             for line in f:
                 bug = json.loads(line)
                 nl = bug['instruction']
-                solution = bug['func']
+                # solution = bug['func']
+                solution = bug['buggy_responses'][0]['func']
                 raw_index = bug['raw_index']
                 buggy_responses = bug['buggy_responses']
                 for br in buggy_responses:
                     funcname = br['funcname']
-                    key = solution + br["func"]
-                    # each br is a buggy response: the model generates top-k sequences
-                    # if br["sim_to_ref"] < 75:
-                    #     continue
                     failures = br['failures']
                     for fail_info in failures:
-                        if key not in sample_per_example:
-                            sample_per_example[key] = 1
-                        if sample_per_example[key] > 3:
-                            dense_samples += 1
-                            continue
-                        # traced program is the buggy program with the pysnooper decorator
                         traced_program = fail_info['program']
                         failed_test = extract_failed_test(traced_program, funcname)
                         if failed_test is None:
                             no_failed_test += 1
                             continue
-                        # log is the terminal output of the traced program'
-                        # log = fail_info['log']
-                        # we do not need log for now
-                        # trace is the trace of the traced program
-                        raw_trace = fail_info['trace']
-                        func_trace = extract_trace(raw_trace, inference=args.inference)
-                        if func_trace is None:
-                            no_func_trace += 1
-                            continue
-                        inlined_trace = attach_trace_to_code(traced_program, func_trace, state_order_flag=True, ignore_intermediate_flag=True)
-                        # capture errors happening in the middle of the execution
-                        inlined_trace = attach_execution_exception(inlined_trace, func_trace)
-                        # clean pysnooper decorator and other stuff
-                        inlined_trace = clean_code(inlined_trace)
-                        if inlined_trace.strip() == "":
-                            inlined_trace = "# No code generated. Please generate again."
-                        # write the sample
-                        sample = {
-                            "raw_index": raw_index,
-                            "nl": nl,
-                            "solution": solution,
-                            "buggy_trace": inlined_trace,
-                            "failed_test": failed_test
-                        }
-                        sample_per_example[key] += 1
+                        
+                        if args.baseline:
+                            raw_trace = fail_info['trace']
+                            func_trace = extract_trace(raw_trace, inference=args.inference)
+                            inlined_trace = attach_trace_to_code(traced_program, func_trace, state_order_flag=True, ignore_intermediate_flag=True)
+                            # # capture errors happening in the middle of the execution
+                            inlined_trace = attach_execution_exception(inlined_trace, func_trace)
+                            # # clean pysnooper decorator and other stuff
+                            inlined_trace = clean_code(inlined_trace)
+                            if inlined_trace.strip() == "":
+                                inlined_trace = "# No code generated. Please generate again."
+
+                            # write the sample
+                            sample = {
+                                "raw_index": raw_index,
+                                "nl": nl,
+                                "buggy_trace": inlined_trace,
+                                "solution": solution,
+                                "failed_test": failed_test
+                            }
+                        else:
+                            # write the sample
+                            sample = {
+                                "raw_index": raw_index,
+                                "nl": nl,
+                                "solution": solution,
+                                "failed_test": failed_test
+                            }
+                            # sample_per_example[key] += 1
                         f_out.write(json.dumps(sample) + '\n')
                         total_samples += 1
 
     print(f"Total samples: {total_samples}")
     print(f"No expected output: {no_failed_test}")
-    print(f"No function trace: {no_func_trace}")
-    print(f"Dense samples: {dense_samples}")
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     # prepare_data
     parser.add_argument('--bug_report_file', type=str)
     parser.add_argument('--inference', action='store_true')
+    parser.add_argument('--baseline', action='store_true')
 
     parser.add_argument('--output_file', type=str)
     args = parser.parse_args()

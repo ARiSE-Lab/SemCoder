@@ -30,7 +30,8 @@ assert f({input}) == ??
 [THOUGHT]
 """
 
-def make_forward_monologue_output_prompt(s, prefix=False):
+def make_forward_monologue_output_prompt(s, prefix=False, version="v1.5"):
+    special_token = "[SCRACHPAD]" if version == "v1" else "[MONOLOGUE]"
     code, input = s
     if not prefix:
         return f"""
@@ -38,7 +39,7 @@ def make_forward_monologue_output_prompt(s, prefix=False):
 {code}
 assert f({input}) == ??
 [/PYTHON]
-[SCRACHPAD]
+{special_token}
 """
     else:
         return f"""Simulate the Execution: You are given a Python function and an assertion containing a function input. Complete the assertion containing the execution output corresponding to the given input in [ANSWER] and [/ANSWER] tags.
@@ -46,7 +47,7 @@ assert f({input}) == ??
 {code}
 assert f({input}) == ??
 [/PYTHON]
-[SCRACHPAD]
+{special_token}
 """
 
 
@@ -138,17 +139,8 @@ assert f(??) == {output}
 """
 
 
-def make_forward_monologue_input_prompt(s):
-    code, output = s
-    return f"""
-[PYTHON]
-{code}
-assert f(??) == {output}
-[/PYTHON]
-[SCRACHPAD]
-"""
-
-def make_backward_monologue_input_prompt(s, prefix=False):
+def make_backward_monologue_input_prompt(s, prefix=False, version="v1.5"):
+    special_token = "[DEDUCTION]" if version == "v1" else "[MONOLOGUE]"
     code, output = s
     if not prefix:
         return f"""
@@ -157,7 +149,7 @@ def make_backward_monologue_input_prompt(s, prefix=False):
 assert f(??) == {output}
 [/PYTHON]
 
-[DEDUCTION]
+{special_token}
 """
     else:
         return f"""Deduce the Semantic Constraints: You are given a Python program and its expected output. Find one input such that executing the program with the input leads to the given output. Complete the assertion with one such input in between [ANSWER] and [/ANSWER].
@@ -166,6 +158,6 @@ PYTHON]
 assert f(??) == {output}
 [/PYTHON]
 
-[DEDUCTION]
+{special_token}
 """
     

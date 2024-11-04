@@ -262,7 +262,8 @@ class SupportedModelKeys(Enum):
     CODELLAMA_PYTHON_34B = "codellama/CodeLlama-34b-Python-hf"
     MAGICODER_CL_7B = "ise-uiuc/Magicoder-CL-7B"
     MAGICODER_S_CL_7B = "ise-uiuc/Magicoder-S-CL-7B"
-    LLAMA_3_8B = "meta-llama/Meta-Llama-3-8B"
+    LLAMA_3_8B = "meta-llama/Llama-3.1-8B"
+    LLAMA_3_8B_INST = "meta-llama/Llama-3.1-8B-Instruct"
 
     # DeepSeek-Coder-based models
     DEEPSEEK_CODER_1_3B = "deepseek-ai/deepseek-coder-1.3b-base"
@@ -304,6 +305,7 @@ class SupportedModelKeys(Enum):
     def llama3_models() -> list[str]:
         return [
             SupportedModelKeys.LLAMA_3_8B.value,
+            SupportedModelKeys.LLAMA_3_8B_INST.value,
         ] 
     @staticmethod
     def codellama_based_models() -> list[str]:

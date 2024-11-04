@@ -235,8 +235,6 @@ class InputPrediction(Task):
         doc["output"] = doc["output"].replace("'", '"')
         if self.cot:
             return make_cot_input_prompt((doc["code"], doc["output"]))
-        elif self.forward_monologue:
-            return make_forward_monologue_input_prompt((doc["code"], doc["output"]))
         elif self.backward_monologue:
             prompt_prefix = self.kwargs.get('prompt_prefix', False)
             return make_backward_monologue_input_prompt((doc["code"], doc["output"]), prefix=prompt_prefix)
