@@ -8,11 +8,11 @@
 </p>
 
 <p align="center">
-    🔍&nbsp;<a href="#-overview">Overview</a>
-    | 🤖&nbsp;<a href="#-models">Models</a>
-    | 📚&nbsp;<a href="#-dataset">Dataset</a>
-    | 🛠️&nbsp;<a href="#-get-started">Get Started</a>
-    | 🧑‍💻&nbsp;<a href="#-experiments">Experiments</a>
+    🔍&nbsp;<a href="#overview">Overview</a>
+    | 🤖&nbsp;<a href="#models">Models</a>
+    | 📚&nbsp;<a href="#dataset">Dataset</a>
+    | 🛠️&nbsp;<a href="#get-started">Get Started</a>
+    | 🧑‍💻&nbsp;<a href="#experiments">Experiments</a>
     | 📝&nbsp;<a href="#-citation">Citation</a>
     | 🙏&nbsp;<a href="#-acknowledgements">Acknowledgements</a>
 </p>
