@@ -5,7 +5,7 @@ import gradio as gr
 
 
 def main(
-    base_model="semcoder/semcoder",
+    base_model="semcoder/semcoder_s_1030",
     device="cuda:0",
     port=8080,
 ):
@@ -17,7 +17,7 @@ def main(
     )
     def evaluate_semcoder(
         instruction,
-        temperature=1,
+        temperature=0.0,
         max_new_tokens=2048,
     ):
         SEMCODER_PROMPT = """You are an exceptionally intelligent coding assistant that consistently delivers accurate and reliable <Code> according to <NL_Description>
