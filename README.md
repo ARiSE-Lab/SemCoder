@@ -22,10 +22,10 @@
 
 ## 🤖 Models
 
-| Model      | HF Ckpt                                               | Size | HEval (+)   | MBPP (+)    | LCB-Lite    | CXEval-I  | CXEval-O  | LCB-Ex | License                                                                           |
-|------------|----------------------------------------------------------|------|-------------|-------------|-------------|-------------|-------------|-------------|-----------------------------------------------------------------------------------|
-| SemCoder   | 🤗 [HF Link](https://huggingface.co/semcoder/semcoder_1030)   | 6.7B | --.- (--.-) | --.- (--.-) | --.- | --.- | --.- | --.- | [DeepSeek](https://github.com/deepseek-ai/DeepSeek-Coder/blob/main/LICENSE-MODEL) |
-| SemCoder-S | 🤗 [HF Link](https://huggingface.co/semcoder/semcoder_s) | 6.7B | --.- (--.-) | --.- (--.-) | --.- | --.- | --.- | --.- | [DeepSeek](https://github.com/deepseek-ai/DeepSeek-Coder/blob/main/LICENSE-MODEL) |
+| Model      | HF Ckpt                                               | Size | HEval (+)   | MBPP (+)    | LCB-Lite    | CXEval-I  | CXEval-O  | LCB-Ex |
+|------------|----------------------------------------------------------|------|-------------|-------------|-------------|-------------|-------------|-------------|
+| SemCoder   | 🤗 [HF Link](https://huggingface.co/semcoder/semcoder_1030)   | 6.7B | --.- (--.-) | --.- (--.-) | --.- | --.- | --.- | --.- |
+| SemCoder-S | 🤗 [HF Link](https://huggingface.co/semcoder/semcoder_s) | 6.7B | --.- (--.-) | --.- (--.-) | --.- | --.- | --.- | --.- |
 
 ## 📚 Dataset
 
