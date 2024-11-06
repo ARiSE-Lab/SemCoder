@@ -46,6 +46,7 @@ bash scripts/eval/eval_codegen.sh
 bash scripts/eval/eval_cruxeval.sh
 ```
 
+<!--
 ### Rubber-duck Debugging and Self-Repair
 - To finetune SemCoder for debugging and self-refinement, please refer to [this script](scripts/train/finetune_refine.sh)
 
@@ -88,3 +89,4 @@ python -m lcb_runner.runner.main \
     --n 1 \
     --evaluate
 ```
+-->
