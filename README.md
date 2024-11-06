@@ -27,28 +27,28 @@
 ### 🤖 SemCoder: Learning to Reason Comprehensive Code Semantics
 - SemCoder not only generates code, but also __comprehensively understands code semantics__.
 - We propose to learn varied semantics: from __high-level functionalities__ to __low-level details__, from __static properties__ to __dynamic program states__.
-- [SemCoder-S-6.7B](https://huggingface.co/semcoder/semcoder_s_1030) outperforms GPT-3.5-turbo on __code generation__ (HumanEval: 79.3 vs. 76.8; LiveCodeBench-Lite: 27.5 vs. 23.9) and __execution reasoning__ (CRUXEval-I: 63.6 vs. 50.3; CRUXEval-O: 63.9 vs. LiveCodeBench-CodeExecution: 59.0; 61.2 vs. 43.6)
+- [SemCoder-S-6.7B](https://huggingface.co/semcoder/semcoder_s_1030) outperforms GPT-3.5-turbo on __code generation__ (HumanEval: 79.3 vs. 76.8; LiveCodeBench-Lite: 27.5 vs. 23.9) and __execution reasoning__ (CRUXEval-I: 63.6 vs. 50.3; CRUXEval-O: 63.9 vs. 59.0; LiveCodeBench-CodeExecution: 61.2 vs. 43.6)
 
 <p align="center">
-<img src="assets/SemCoder-semantics.png" alt="Description of image" style="width:70%;">
+<img src="assets/SemCoder-semantics.png" alt="examples of varied semantics" style="width:70%;">
 </p>
 
 ### 🤔 Monologue Reasoning: Bridging the Gap Between Static Texts and Dynamic Execution
 - Motivated by rubber-duck debugging, we propose __monologue reasoning__, learning to explain dynamic execution by reasoning important values, properties and constraints.
 - Monologues are bi-directional: __forward and backward__.
-- Monologue is notably more effective than both scratchpad and chain-of-thoughts in reasoning dynamic execution.
+- Monologue is notably __more effective than both scratchpad and chain-of-thoughts__ in reasoning dynamic execution.
 
 <p align="center">
-<img src="assets/SemCoder-monologues.png" alt="Description of image" style="width:73%;">
+<img src="assets/SemCoder-monologues.png" alt="monologue examples" style="width:85%;">
 </p>
 
 ## Models
 
 
-| Model      | HF Checkpoints                                               | Size | License                                                                           |
-|------------|----------------------------------------------------------|------|-----------------------------------------------------------------------------------|
+| Model      | HF Checkpoints                                                | Size | License                                                                           |
+|------------|---------------------------------------------------------------|------|-----------------------------------------------------------------------------------|
 | SemCoder   | 🤗 [HF Link](https://huggingface.co/semcoder/semcoder_1030)   | 6.7B | [DeepSeek](https://github.com/deepseek-ai/DeepSeek-Coder/blob/main/LICENSE-MODEL) |
-| SemCoder-S | 🤗 [HF Link](https://huggingface.co/semcoder/semcoder_s_1030) | 6.7B |[DeepSeek](https://github.com/deepseek-ai/DeepSeek-Coder/blob/main/LICENSE-MODEL) |
+| SemCoder-S | 🤗 [HF Link](https://huggingface.co/semcoder/semcoder_s_1030) | 6.7B |[DeepSeek](https://github.com/deepseek-ai/DeepSeek-Coder/blob/main/LICENSE-MODEL)  |
 
 ## Dataset
 

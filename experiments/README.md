@@ -1,11 +1,38 @@
 ## Evaluation
 
+### Get Started
 
-- To evaluate SemCoder on [EvalPlus](https://github.com/evalplus/evalplus), run
+- Set up [EvalPlus](https://github.com/evalplus/evalplus): HumanEval(+) and MBPP(+), as well as their evaluation utils should be already installed with [environment.yml](environment.yml)
+- Set up [CRUXEval](https://github.com/evalplus/evalplus):
+```
+git clone https://github.com/facebookresearch/cruxeval.git
+```
+
+Update the `$CRUXEVAL_HOME` to be the **absolute path** of the cloned repository in [this script](scripts/eval/eval_cruxeval.sh)
+- Set up [LiveCodeBench](https://livecodebench.github.io/):
 ```sh
+# Clone LiveCodeBench
+git clone https://github.com/Robin-Y-Ding/LiveCodeBench.git; # forked version with SemCoder customization
+
+# Set up environment
+cd LiveCodeBench;
+conda create -n livecodebench Python=3.10;
+conda activate livecodebench;
+pip install poetry;
+poetry install --with with-gpu;
+```
+
+### Code Generation
+
+- To evaluate SemCoder on EvalPlus, run
+```sh
+conda activate semcoder;
+# make sure you are under <path>/SemCoder/
+export PYTHONPATH=$(pwd);
 bash scripts/eval/eval_evalplus.sh
 ```
 
+### Execution Reasoning
 - To evaluate SemCoder on [CRUXEval](https://github.com/evalplus/evalplus), you need to firstly clone their official release:
 
 ```

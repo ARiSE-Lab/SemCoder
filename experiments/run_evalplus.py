@@ -28,7 +28,7 @@ def get_humaneval_raw_problems() -> list[dict]:
     return list(problems.values())
 
 
-def map_mbpp_problem(p: dict, version: str = "v1", monologue: bool = True) -> NL2CodeProblem:
+def map_mbpp_problem(p: dict) -> NL2CodeProblem:
     id = p["task_id"]
     prompt = p["prompt"]
     start_index = prompt.index('"""')
@@ -43,16 +43,14 @@ def map_mbpp_problem(p: dict, version: str = "v1", monologue: bool = True) -> NL
 ```python
 {assertion}
 ```"""
-    if version == "v1" or not monologue:
-        response_prefix = f"""```python"""
-    else:
-        response_prefix = """[MONOLOGUE]"""
+    response_prefix = f"""```python"""
+
     return NL2CodeProblem(
         id=str(id), instruction=instruction, response_prefix=response_prefix
     )
 
 
-def map_humaneval_problem(p: dict, version: str = "v1", monologue: bool = True) -> NL2CodeProblem:
+def map_humaneval_problem(p: dict) -> NL2CodeProblem:
     id = p["task_id"]
     prompt = p["prompt"]
     prompt = prompt.strip()
@@ -60,11 +58,8 @@ def map_humaneval_problem(p: dict, version: str = "v1", monologue: bool = True) 
 ```python
 {prompt}
 ```"""
-    if version == "v1" or not monologue:
-        response_prefix = f"""```python
+    response_prefix = f"""```python
 {prompt}"""
-    else:
-        response_prefix = """[MONOLOGUE]"""
     return NL2CodeProblem(
         id=id, instruction=instruction, response_prefix=response_prefix
     )
@@ -82,8 +77,6 @@ class Args:
     with_template: bool = True
 
     model_name_or_path: str | None = None
-    semcoder_version: Literal["v1", "v1.5"] = "v1"
-    monologue: bool = True
 
 
 def main():
@@ -100,7 +93,7 @@ def main():
     raw_problems = raw_problem_fn()
     # map the raw problems to a dict {"<task_id>": <prompt>}"
     raw_problems_dict = {p["task_id"]: p["prompt"] for p in raw_problems}
-    problems = list(map(map_problem_fn, raw_problems, itertools.repeat(args.semcoder_version), itertools.repeat(args.monologue)))
+    problems = list(map(map_problem_fn, raw_problems))
 
     state = get_model_context(args.model_key, args.model_name_or_path)
 
@@ -131,7 +124,7 @@ def main():
         assert len(completions) == len(problems) * args.n_samples_per_problem
         print("COMPLETION")
         print(completions[-1])
-        if args.with_template and (args.semcoder_version == "v1" or not args.monologue):
+        if args.with_template: # default setting for semcoder
             samples = [
                 dict(
                     task_id=task_id,
@@ -145,7 +138,7 @@ def main():
             ]
             for sample in samples:
                 sample["solution"] = raw_problems_dict[sample["task_id"]] + sample["completion"]
-        else:
+        else: # chat model setting
             samples = [
                 dict(
                     task_id=task_id,

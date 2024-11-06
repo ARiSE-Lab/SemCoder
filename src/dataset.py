@@ -7,7 +7,7 @@ from src.wrapper import (
     pad_sequences,
 )
 from src.utils import Args
-from src.prompts import NL2CODE_PROMPT, EXEC_I_PROMPT, EXEC_O_PROMPT, OPT_PROMPT, IPT_PROMPT, REFINE_PROMPT
+from src.prompts import NL2CODE_PROMPT, EXEC_I_PROMPT, EXEC_O_PROMPT, REFINE_PROMPT
 
 # Ignored index in CrossEntropyLoss
 IGNORED_INDEX = -100
@@ -79,29 +79,29 @@ def map_dataset_multitask(
     Processes the multi-task samples into input_ids and labels
     """
 
-    nl = examples["nl"]
-    exec_simu = examples["exec_simu"]
-    exec_deduc = examples["exec_deduc"]
     responses = examples["response"]
 
     if args.task == "semcoder":
         prompts = []
         completions = []
-        for nl_i, exec_simu_i, exec_deduc_i, response_i in zip(
-            nl, exec_simu, exec_deduc, responses
+        nl = examples["nl"]
+        fwd_mnl = examples["fwd_mnl"] # forward monologue
+        bwd_mnl = examples["bwd_mnl"] # backward monologue
+        for nl_i, fwd_mnl_i, bwd_mnl_i, response_i in zip(
+            nl, fwd_mnl, bwd_mnl, responses
         ):
             # Not allow all empty samples
-            assert not (nl_i == "" and exec_simu_i == "" and exec_deduc_i == "")
+            assert not (nl_i == "" and fwd_mnl_i == "" and bwd_mnl_i == "")
             # Only one of the three has content
-            assert sum([nl_i != "", exec_simu_i != "", exec_deduc_i != ""]) == 1
+            assert sum([nl_i != "", fwd_mnl_i != "", bwd_mnl_i != ""]) == 1
             if nl_i != "":
                 prompt = NL2CODE_PROMPT.format(instruction=nl_i, response="")
                 completion = response_i
-            elif exec_deduc_i != "":
-                prompt = EXEC_I_PROMPT.format(instruction=exec_deduc_i, response="")
+            elif bwd_mnl_i != "":
+                prompt = EXEC_I_PROMPT.format(instruction=bwd_mnl_i, response="")
                 completion = response_i
             else:
-                prompt = EXEC_O_PROMPT.format(instruction=exec_simu_i, response="")
+                prompt = EXEC_O_PROMPT.format(instruction=fwd_mnl_i, response="")
                 completion = response_i
             prompts.append(prompt)
             completions.append(completion)
@@ -109,121 +109,13 @@ def map_dataset_multitask(
         faults = examples["fault"]
         prompts = []
         completions = []
-        # for nl_i, exec_simu_i, exec_deduc_i, fault_i, response_i in zip(
-        #     nl, exec_simu, exec_deduc, faults, responses
-        # ):
         for fault_i, response_i in zip(faults, responses):
-            # Not allow all empty samples
-            # assert not (
-            #     nl_i == "" and exec_simu_i == "" and exec_deduc_i == "" and fault_i == ""
-            # )
-            # # Only one of the four has content
-            # assert sum(
-            #     [nl_i != "", exec_simu_i != "", exec_deduc_i != "", fault_i != ""]
-            # ) == 1
-            # if nl_i != "":
-            #     prompt = NL2CODE_PROMPT.format(instruction=nl_i, response="")
-            #     completion = response_i
-            # elif exec_deduc_i != "":
-            #     prompt = EXEC_I_PROMPT.format(instruction=exec_deduc_i, response="")
-            #     completion = response_i
-            # elif fault_i != "":
-            #     prompt = REFINE_PROMPT.format(instruction=fault_i, response="")
-            #     completion = response_i
-            # else:
-            #     prompt = EXEC_O_PROMPT.format(instruction=exec_simu_i, response="")
-            #     completion = response_i
             prompt = REFINE_PROMPT.format(instruction=fault_i, response="")
             completion = response_i
             prompts.append(prompt)
             completions.append(completion)
     else:
         raise ValueError(f"Invalid task: {args.task}")
-
-    assert len(prompts) == len(completions)
-    prompt_config = EncodingConfig(add_bos=True, add_eos=False)
-    completion_config = EncodingConfig(add_bos=False, add_eos=True)
-    prompt_id_batches = context.encode(prompt_config, prompts)
-    completion_id_batches = context.encode(completion_config, completions)
-    assert len(prompt_id_batches) == len(completion_id_batches)
-    untruncated_input_ids = [
-        (instruction_ids + response_ids)
-        for instruction_ids, response_ids in zip(
-            prompt_id_batches, completion_id_batches
-        )
-    ]
-    exceeding_length = [
-        len(input_id) > args.max_training_seq_length
-        for input_id in untruncated_input_ids
-    ]
-    input_ids = [
-        input_id[: args.max_training_seq_length] for input_id in untruncated_input_ids
-    ]
-    labels = [
-        (list(map(lambda _: IGNORED_INDEX, instruction_ids)) + response_ids)[
-            : args.max_training_seq_length
-        ]
-        for instruction_ids, response_ids in zip(
-            prompt_id_batches, completion_id_batches
-        )
-    ]
-    # `len` of each returned value must be the same, which is required by `tokenizer.map`
-    # After `map`, they are treated as individual pieces of data, not as a batch.
-    assert len(input_ids) == len(labels)
-    for input_id_batch, label_batch in zip(input_ids, labels):
-        assert len(input_id_batch) == len(label_batch)
-    print(context.decode(DecodingConfig.default(), input_ids[0:])[0])
-    return {
-        "input_ids": input_ids,
-        "labels": labels,
-        "exceeding_length": exceeding_length,
-    }
-
-
-def map_dataset_multitask_v1p5(
-    examples: dict[str, list[str]],
-    args: "Args",
-    context: TokenizationContext,
-) -> dict:
-    """
-    Processes the multi-task samples into input_ids and labels
-    """
-
-    nl = examples["nl"]
-    exec_simu = examples["exec_simu"]
-    exec_deduc = examples["exec_deduc"]
-    opt = examples["opt"]
-    ipt = examples["ipt"]
-    responses = examples["response"]
-
-    prompts = []
-    completions = []
-    for nl_i, exec_simu_i, exec_deduc_i, opt_i, ipt_i, response_i in zip(
-        nl, exec_simu, exec_deduc, opt, ipt, responses
-    ):
-        # Not allow all empty samples
-        assert not (nl_i == "" and exec_simu_i == "" and exec_deduc_i == "" and opt_i == "" and ipt_i == "")
-        # Only one of the three has content
-        assert sum([nl_i != "", exec_simu_i != "", exec_deduc_i != "", opt_i != "", ipt_i != ""]) == 1
-        if nl_i != "":
-            prompt = NL2CODE_PROMPT.format(instruction=nl_i, response="")
-            completion = response_i
-        elif exec_simu_i != "":
-            prompt = EXEC_O_PROMPT.format(instruction=exec_simu_i, response="")
-            completion = response_i
-        elif exec_deduc_i != "":
-            prompt = EXEC_I_PROMPT.format(instruction=exec_deduc_i, response="")
-            completion = response_i
-        elif opt_i != "":
-            prompt = OPT_PROMPT.format(instruction=opt_i, response="")
-            completion = response_i
-        elif ipt_i != "":
-            prompt = IPT_PROMPT.format(instruction=ipt_i, response="")
-            completion = response_i
-        else:
-            raise ValueError(f"Invalid task: {args.task}")
-        prompts.append(prompt)
-        completions.append(completion)
 
     assert len(prompts) == len(completions)
     prompt_config = EncodingConfig(add_bos=True, add_eos=False)
