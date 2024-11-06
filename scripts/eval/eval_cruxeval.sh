@@ -1,14 +1,16 @@
 #!/bin/bash
 
-##########################################################################################
+###################################################################################
 # Hardware: 1x A6000 48GB GPU, or any other GPUs with at least 48GB memory
-# Note: To reproduce the results reported in the paper, do not change the hyperparameters.
-##########################################################################################
+# Note: We use the default hyperparameters provided by the corresponding benchmark.
+# To reproduce the results reported in the paper, do not change it.
+###################################################################################
+
 export CUDA_VISIBLE_DEVICES=0
 
 CRUXEVAL_HOME="/proj/arise/arise/yd2447/cruxeval"
 SEMCODER_HOME=$(pwd)
-MODEL=semcoder/semcoder_s
+MODEL=semcoder/semcoder_s_1030
 
 ########################### 
 # CRUXEval-I: run inference

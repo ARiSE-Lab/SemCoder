@@ -3,7 +3,7 @@
 ### Get Started
 
 - Set up [EvalPlus](https://github.com/evalplus/evalplus): HumanEval(+) and MBPP(+), as well as their evaluation utils should be already installed with [environment.yml](environment.yml)
-- Set up [CRUXEval](https://github.com/evalplus/evalplus):
+- Set up [CRUXEval](https://github.com/facebookresearch/cruxeval):
 ```
 git clone https://github.com/facebookresearch/cruxeval.git
 ```
@@ -26,25 +26,27 @@ poetry install --with with-gpu;
 
 - To evaluate SemCoder on EvalPlus, run
 ```sh
+cd SemCoder;
 conda activate semcoder;
 # make sure you are under <path>/SemCoder/
 export PYTHONPATH=$(pwd);
 bash scripts/eval/eval_evalplus.sh
 ```
+- To evaluate SemCoder on LiveCodeBench, run
+```sh
+cd LiveCodeBench;
+conda activate livecodebench;
+# make sure you are under <path>/LiveCodeBench/
+bash scripts/eval/eval_codegen.sh
+```
 
 ### Execution Reasoning
-- To evaluate SemCoder on [CRUXEval](https://github.com/evalplus/evalplus), you need to firstly clone their official release:
-
-```
-git clone https://github.com/facebookresearch/cruxeval.git
-```
-
-Update the `$CRUXEVAL_HOME` to be the **absolute path** of the cloned repository in [this script](scripts/eval/eval_cruxeval.sh) and run:
-
+- To evaluate SemCoder on CRUXEval, you need to firstly clone their official release:
 ```sh
 bash scripts/eval/eval_cruxeval.sh
 ```
 
+### Rubber-duck Debugging and Self-Repair
 - To finetune SemCoder for debugging and self-refinement, please refer to [this script](scripts/train/finetune_refine.sh)
 
 - To evaluate SemCoder for iterative self-refinement on EvalPlus, please run 

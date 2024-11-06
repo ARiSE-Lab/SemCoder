@@ -1,9 +1,10 @@
 #!/bin/bash
 
-##########################################################################################
+###################################################################################
 # Hardware: 1x A6000 48GB GPU, or any other GPUs with at least 48GB memory
-# Note: To reproduce the results reported in the paper, do not change the hyperparameters.
-##########################################################################################
+# Note: We use the default hyperparameters provided by the corresponding benchmark.
+# To reproduce the results reported in the paper, do not change it.
+###################################################################################
 
 export CUDA_VISIBLE_DEVICES=0
 
