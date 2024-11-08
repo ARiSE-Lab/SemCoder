@@ -43,11 +43,27 @@ bash scripts/eval/eval_codegen.sh
 ### Execution Reasoning
 - To evaluate SemCoder on CRUXEval, you need to firstly clone their official release:
 ```sh
+cd SemCoder;
+conda activate semcoder;
+# make sure you are under <path>/SemCoder/
+export PYTHONPATH=$(pwd);
 bash scripts/eval/eval_cruxeval.sh
 ```
+- To evaluate SemCoder on LiveCodeBench, run
+```sh
+cd LiveCodeBench;
+conda activate livecodebench;
+# make sure you are under <path>/LiveCodeBench/
+bash scripts/eval/eval_codeexe.sh
+```
+
 
 <!--
-### Rubber-duck Debugging and Self-Repair
+### Rubber-duck Debugging and Self-Refine
+- To evaluate SemCoder with zero-shot rubber-duck debugging and self-refine on EvalPlus, run:
+```sh
+
+```
 - To finetune SemCoder for debugging and self-refinement, please refer to [this script](scripts/train/finetune_refine.sh)
 
 - To evaluate SemCoder for iterative self-refinement on EvalPlus, please run 
