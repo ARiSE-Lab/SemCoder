@@ -215,11 +215,9 @@ class InputPrediction(Task):
     DATASET_PATH = "cruxeval-org/cruxeval"
     DATASET_NAME = None
 
-    def __init__(self, cot = False, forward_monologue = False, backward_monologue = False, **kwargs):
+    def __init__(self, cot = False, monologue = False):
         self.cot = cot
-        self.forward_monologue = forward_monologue
-        self.backward_monologue = backward_monologue
-        self.kwargs = kwargs
+        self.monologue = monologue
         super().__init__(
             stop_words=["[/ANSWER]"],
             requires_execution=False,
@@ -233,11 +231,12 @@ class InputPrediction(Task):
         # replace single quote to double quote: forward_monologue fine-tuning requires this
         doc["code"] = doc["code"].replace("'", '"')
         doc["output"] = doc["output"].replace("'", '"')
+        # cot and monologue cannot be both true
+        assert not (self.cot and self.monologue), "cot and monologue cannot be both true"
         if self.cot:
             return make_cot_input_prompt((doc["code"], doc["output"]))
-        elif self.backward_monologue:
-            prompt_prefix = self.kwargs.get('prompt_prefix', False)
-            return make_backward_monologue_input_prompt((doc["code"], doc["output"]), prefix=prompt_prefix)
+        elif self.monologue:
+            return make_backward_monologue_input_prompt((doc["code"], doc["output"]))
         else:
             return make_direct_input_prompt((doc["code"], doc["output"]))
 
@@ -249,7 +248,7 @@ class InputPrediction(Task):
         assert generation.startswith(prompt), print(generation, prompt)
 
         generation = generation[len(prompt):]
-        if self.cot or self.forward_monologue:
+        if self.cot or self.monologue:
             if "[ANSWER]" in generation:
                 generation = generation.split("[ANSWER]")[1].strip()
         if "==" in generation:
@@ -269,11 +268,9 @@ class OutputPrediction(Task):
     DATASET_PATH = "cruxeval-org/cruxeval"
     DATASET_NAME = None
 
-    def __init__(self, cot = False, forward_monologue = False, annotate_src = False, **kwargs):
+    def __init__(self, cot = False, monologue = False):
         self.cot = cot
-        self.forward_monologue = forward_monologue
-        self.annotate_src = annotate_src
-        self.kwargs = kwargs
+        self.monologue = monologue
         stop_words = ["[/ANSWER]"]
 
         super().__init__(
@@ -289,21 +286,12 @@ class OutputPrediction(Task):
         # replace single quote to double quote: forward_monologue fine-tuning requires this
         doc["code"] = doc["code"].replace("'", '"')
         doc["input"] = doc["input"].replace("'", '"')
+        # cot and monologue cannot be both true
+        assert not (self.cot and self.monologue), "cot and monologue cannot be both true"
         if self.cot:
             return make_cot_output_prompt((doc["code"], doc["input"]))
-        elif self.forward_monologue:
-            prompt_prefix = self.kwargs.get('prompt_prefix', False)
-            if self.annotate_src:
-                code = doc["code"]
-                # annotate each line with a comment: # [Lx]
-                code = code.split("\n")
-                for i, line in enumerate(code, 1):
-                    if line.strip() != "":
-                        code[i-1] = f"{line} # [L{i + 4}]"
-                code = "\n".join(code)
-                return make_forward_monologue_output_prompt((code, doc["input"]), prefix=prompt_prefix)
-            else:
-                return make_forward_monologue_output_prompt((doc["code"], doc["input"]), prefix=prompt_prefix)
+        elif self.monologue:
+            return make_forward_monologue_output_prompt((doc["code"], doc["input"]))
         else:
             return make_direct_output_prompt((doc["code"], doc["input"]))
 
@@ -315,7 +303,7 @@ class OutputPrediction(Task):
         assert generation.startswith(prompt), print(generation, prompt)
         generation = generation[len(prompt):]
 
-        if self.cot or self.forward_monologue:
+        if self.cot or self.monologue:
             if "[ANSWER]" in generation:
                 generation = generation.split("[ANSWER]")[1].strip()
         if "==" in generation:
@@ -333,10 +321,9 @@ TASK_REGISTRY = {
 ALL_TASKS = sorted(list(TASK_REGISTRY))
 
 
-def get_task(task_name, cot = False, forward_monologue = False, backward_monologue = False, annotate_src = False, **kwargs):
-    prompt_prefix = kwargs.get('prompt_prefix', False)
+def get_task(task_name, cot = False, monologue = False):
     try:
-        return TASK_REGISTRY[task_name](cot = cot, forward_monologue = forward_monologue, backward_monologue = backward_monologue, annotate_src = annotate_src, prompt_prefix=prompt_prefix)
+        return TASK_REGISTRY[task_name](cot = cot, monologue = monologue)
     except KeyError:
         print("Available tasks:")
         pprint(TASK_REGISTRY)
@@ -407,7 +394,7 @@ class Generator:
         self.args = args
 
     def generate(self, task_name, log_path):
-        task = get_task(task_name, cot = self.args.cot, forward_monologue = self.args.forward_monologue, backward_monologue = self.args.backward_monologue, annotate_src = self.args.annotate_src, prompt_prefix=self.args.prompt_prefix)
+        task = get_task(task_name, cot = self.args.cot, monologue = self.args.monologue)
 
         dataset = task.get_dataset()
 

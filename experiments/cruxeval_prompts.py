@@ -30,19 +30,16 @@ assert f({input}) == ??
 [THOUGHT]
 """
 
-def make_forward_monologue_output_prompt(s, prefix=False, version="v1.5"):
-    special_token = "[SCRACHPAD]" if version == "v1" else "[MONOLOGUE]"
+def make_forward_monologue_output_prompt(s):
+    special_token = "[MONOLOGUE]" # We just need a special token to trigger the monologue -- no few-shot examples needed
     code, input = s
-    if not prefix:
-        return f"""
-[PYTHON]
-{code}
-assert f({input}) == ??
-[/PYTHON]
-{special_token}
-"""
-    else:
-        return f"""Simulate the Execution: You are given a Python function and an assertion containing a function input. Complete the assertion containing the execution output corresponding to the given input in [ANSWER] and [/ANSWER] tags.
+    # annotate each line with a line label for efficient monologue: # [Lx]
+    code = code.split("\n")
+    for i, line in enumerate(code, 1):
+        if line.strip() != "":
+            code[i-1] = f"{line} # [L{i + 4}]"
+    code = "\n".join(code)
+    return f"""Simulate the Execution: You are given a Python function and an assertion containing a function input. Complete the assertion containing the execution output corresponding to the given input in [ANSWER] and [/ANSWER] tags.
 [PYTHON]
 {code}
 assert f({input}) == ??
@@ -139,20 +136,10 @@ assert f(??) == {output}
 """
 
 
-def make_backward_monologue_input_prompt(s, prefix=False, version="v1.5"):
-    special_token = "[DEDUCTION]" if version == "v1" else "[MONOLOGUE]"
+def make_backward_monologue_input_prompt(s):
+    special_token = "[MONOLOGUE]"
     code, output = s
-    if not prefix:
-        return f"""
-[PYTHON]
-{code}
-assert f(??) == {output}
-[/PYTHON]
-
-{special_token}
-"""
-    else:
-        return f"""Deduce the Semantic Constraints: You are given a Python program and its expected output. Find one input such that executing the program with the input leads to the given output. Complete the assertion with one such input in between [ANSWER] and [/ANSWER].
+    return f"""Deduce the Semantic Constraints: You are given a Python program and its expected output. Find one input such that executing the program with the input leads to the given output. Complete the assertion with one such input in between [ANSWER] and [/ANSWER].
 PYTHON]
 {code}
 assert f(??) == {output}

@@ -6,7 +6,7 @@
 # To reproduce the results reported in the paper, do not change it.
 ###################################################################################
 
-export CUDA_VISIBLE_DEVICES=0
+export CUDA_VISIBLE_DEVICES=1
 
 CRUXEVAL_HOME="/proj/arise/arise/yd2447/cruxeval"
 SEMCODER_HOME=$(pwd)
@@ -42,8 +42,7 @@ python experiments/run_cruxeval.py \
     --start 0 \
     --end 800 \
     --shuffle \
-    --backward_monologue \
-    --prompt_prefix \
+    --monologue \
     --tensor_parallel_size 1
 
 ########################## 
@@ -96,9 +95,7 @@ python experiments/run_cruxeval.py \
     --start 0 \
     --end 800 \
     --shuffle \
-    --forward_monologue \
-    --prompt_prefix \
-    --annotate_src \
+    --monologue \
     --tensor_parallel_size 1
 
 ########################## 
